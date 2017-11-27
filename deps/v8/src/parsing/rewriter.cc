@@ -335,6 +335,10 @@ void Processor::VisitDebuggerStatement(DebuggerStatement* node) {
   replacement_ = node;
 }
 
+void Processor::VisitInitializeClassFieldsStatement(
+    InitializeClassFieldsStatement* node) {
+  replacement_ = node;
+}
 
 // Expressions are never visited.
 #define DEF_VISIT(type)                                         \
@@ -359,7 +363,9 @@ bool Rewriter::Rewrite(ParseInfo* info) {
 
   RuntimeCallTimerScope runtimeTimer(
       info->runtime_call_stats(),
-      &RuntimeCallStats::CompileRewriteReturnResult);
+      info->on_background_thread()
+          ? &RuntimeCallStats::CompileBackgroundRewriteReturnResult
+          : &RuntimeCallStats::CompileRewriteReturnResult);
 
   FunctionLiteral* function = info->literal();
   DCHECK_NOT_NULL(function);
